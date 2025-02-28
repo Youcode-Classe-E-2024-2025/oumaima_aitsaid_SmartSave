@@ -15,6 +15,7 @@ class ProfileController extends Controller
     public function index(Family $family)
     {
         $profiles = $family->profiles;
+        dd($profiles);
         return view('profiles.index', compact('family', 'profiles'));
     }
 

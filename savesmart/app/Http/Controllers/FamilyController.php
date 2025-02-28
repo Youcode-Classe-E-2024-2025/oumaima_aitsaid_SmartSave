@@ -13,10 +13,11 @@ class FamilyController extends Controller
      */
     public function index()
     {
-        $families = Auth::user()->families;
+
+        $families = Family::where("user_id", "=", Auth::user()->id)->get();
+        
         return view('families.index', compact('families'));
     }
-
     /**
      * Show the form for creating a new resource.
      */

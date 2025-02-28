@@ -20,7 +20,7 @@ public function register(Request $request){
     $validator =Validator::make($request->all(), [
         'name' => 'required|string|max:255',
         'email'=>'required|string|email|max:255|unique:users',
-        'password'=>'required|string|max:8',
+        'password'=>'required|string|max:50',
     ]);
     if($validator->fails()){
         return redirect('register')
@@ -68,4 +68,4 @@ public function register(Request $request){
         $request->session()->regenerateToken();
 
         return redirect('/'); 
-}
+}}

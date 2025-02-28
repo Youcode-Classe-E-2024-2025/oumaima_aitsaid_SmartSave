@@ -15,12 +15,12 @@ class Family extends Model
         'name',
     ];
 
-    public function user():BelongsTo
+    public function user():hasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(User::class);
     }
     public function profiles():BelongsTo
     {
-        return $this->hasMany(Profile::class);
+        return $this->belongsTo(Profile::class);
     }
 }
