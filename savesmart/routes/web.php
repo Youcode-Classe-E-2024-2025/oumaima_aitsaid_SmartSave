@@ -15,3 +15,6 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/home', [AuthController::class, 'home'])->name('home')->middleware('auth'); 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::resource('families', FamilyController::class)->middleware('auth');
+Route::resource('families/{family}/profiles', ProfileController::class)->middleware('auth');
