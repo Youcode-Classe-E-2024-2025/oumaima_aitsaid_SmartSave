@@ -70,6 +70,9 @@
                                 <a class="bg-[#27AE60] text-[#ECF0F1] px-4 py-2 rounded-md hover:bg-[#219653] transition duration-300" href="{{ route('register') }}">{{ __('Register') }}</a>
                             @endif
                         @else
+                        <li class="nav-item">
+                  <a class="text-[#ECF0F1] hover:text-[#27AE60] transition duration-300"  href="{{ route('settings.index') }}">Settings</a>
+                          </li>
                             <div class="relative">
                                 <button id="navbarDropdown" class="flex items-center space-x-2 focus:outline-none" onclick="toggleDropdown()">
                                     <span class="text-[#ECF0F1]">{{ Auth::user()->name }}</span>
@@ -77,7 +80,6 @@
                                         <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                                     </svg>
                                 </button>
-
                                 <!-- Dropdown Menu -->
                                 <div id="dropdownMenu" class="navbar-dropdown absolute right-0 mt-2 w-48 bg-[#2C3E50] rounded-md shadow-lg z-10">
                                     <a class="block py-2 px-4 text-sm text-[#ECF0F1] hover:bg-[#34495E] transition duration-300" href="{{ route('logout') }}"

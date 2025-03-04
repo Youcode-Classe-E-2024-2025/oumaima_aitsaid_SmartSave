@@ -39,53 +39,79 @@ class HomeController extends Controller
             }
         }
     }
-    public function dashboard() //Changed the index method so it does
+    public function dashboard()
     {
-    $user = Auth::user();
+        $user = Auth::user();
+        $familyMemberId = session('family_member_id');
+        $viewingAsFamilyMember = false;
 
-    if (session('family_member_id')) {
-        // Family member is logged in
-        $familyMember = FamilyMember::find(session('family_member_id'));
-        if (!$familyMember) {
-            abort(404, 'Family member not found');
+        if ($familyMemberId) {
+            // Family member is logged in
+            $familyMember = FamilyMember::find($familyMemberId);
+            if (!$familyMember) {
+                abort(404, 'Family member not found');
+            }
+
+            $expenses = Expense::where('family_member_id', $familyMember->id)->get();
+            $incomes = Income::where('family_member_id', $familyMember->id)->get();
+            $goals = FinancialGoal::where('family_member_id', $familyMember->id)->get();
+
+            $viewingAsFamilyMember = true;
+        } else {
+            // Main user is logged in (or no one is logged in)
+            if (!$user) {
+                return redirect('/login');
+            }
+
+            $expenses = Expense::where('family_member_id', $user->id)->get();
+            $incomes = Income::where('family_member_id', $user->id)->get();
+            $goals = FinancialGoal::where('family_member_id', $user->id)->get();
         }
 
-        $expenses = Expense::where('family_member_id', $familyMember->id)->get();
-        $incomes = Income::where('family_member_id', $familyMember->id)->get();
-        $goals = FinancialGoal::where('family_member_id', $familyMember->id)->get();
-    } else {
-        // Main user is logged in (or no one is logged in)
-        if (!$user) {
-            return redirect('/login');
+        $totalIncome = $incomes->sum('amount');
+        $totalExpenses = $expenses->sum('amount');
+        $netBalance = $totalIncome - $totalExpenses;
+
+        // Calculate expenses for needs, wants, and savings (replace category IDs with your actual IDs)
+        $needs = $expenses->where('category_id', 1)->sum('amount');
+        $wants = $expenses->where('category_id', 2)->sum('amount');
+        $savings = $expenses->where('category_id', 5)->sum('amount');
+
+        $budgetingRule = $user->budgeting_rule ?? '50/30/20';
+
+        // Calculate recommended allocation based on selected rule
+        $recommendedNeeds = 0;
+        $recommendedWants = 0;
+        $recommendedSavings = 0;
+
+        if ($budgetingRule === '70/20/10') {
+            $recommendedNeeds = $totalIncome * 0.7;
+            $recommendedWants = 0;
+            $recommendedSavings = $totalIncome * 0.2;
+        } else {
+            // Default to 50/30/20
+            $recommendedNeeds = $totalIncome * 0.5;
+            $recommendedWants = $totalIncome * 0.3;
+            $recommendedSavings = $totalIncome * 0.2;
         }
 
-        $expenses = Expense::where('family_member_id', $user->id)->get();
-        $incomes = Income::where('family_member_id', $user->id)->get();
-        $goals = FinancialGoal::where('family_member_id', $user->id)->get();
+        $viewData = [
+            'user' => $user,
+            'familyMemberId' => $familyMemberId,
+            'expenses' => $expenses,
+            'incomes' => $incomes,
+            'goals' => $goals,
+            'totalIncome' => $totalIncome,
+            'totalExpenses' => $totalExpenses,
+            'netBalance' => $netBalance,
+            'needs' => $needs,
+            'wants' => $wants,
+            'savings' => $savings,
+            'recommendedNeeds' => $recommendedNeeds,
+            'recommendedWants' => $recommendedWants,
+            'recommendedSavings' => $recommendedSavings,
+        ];
+
+        return view('dashboard', $viewData);
     }
-
-    $totalIncome = $incomes->sum('amount');
-    $totalExpenses = $expenses->sum('amount');
-
-    // Calculate expenses for needs, wants, and savings (replace category IDs with your actual IDs)
-    $needs = $expenses->where('category_id', 1)->sum('amount');
-    $wants = $expenses->where('category_id', 2)->sum('amount');
-    $savings = $expenses->where('category_id', 5)->sum('amount');
-    //In this part, you can change the number.
-
-    $viewData = [
-        'user' => $user,
-        'familyMemberId' => session('family_member_id'),
-        'expenses' => $expenses,
-        'incomes' => $incomes,
-        'goals' => $goals,
-        'totalIncome' => $totalIncome,
-        'totalExpenses' => $totalExpenses,
-        'needs' => $needs,
-        'wants' => $wants,
-        'savings' => $savings,
-    ];
-
-    return view('dashboard', $viewData);
-}
 }
