@@ -4,23 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Family extends Model
 {
     use HasFactory;
-    protected $fillable = [
-        'user_id',
-        'name',
-    ];
 
-    public function user():hasMany
+    protected $fillable = ['name', 'user_id'];
+
+    public function user()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsTo(User::class);
     }
-    public function profiles():BelongsTo
+
+    public function familyMembers()
     {
-        return $this->belongsTo(Profile::class);
+        return $this->hasMany(FamilyMember::class);
     }
 }

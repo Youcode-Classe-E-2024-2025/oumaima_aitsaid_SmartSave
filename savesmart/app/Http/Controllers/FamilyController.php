@@ -8,80 +8,27 @@ use Illuminate\Support\Facades\Auth;
 
 class FamilyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-
-        $families = Family::where("user_id", "=", Auth::user()->id)->get();
-        
-        return view('families.index', compact('families'));
-    }
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('families.create');
+        return view('families.create'); // Create a view for the form
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
         ]);
 
-        Auth::user()->families()->create([
-            'name' => $request->name,
-        ]);
+        $family = new Family();
+        $family->name = $request->name;
+        $family->user_id = Auth::id(); // The logged-in user is the admin
+        $family->save();
 
-        return redirect()->route('families.index')->with('success', 'Famille créée avec succès.');
+        return redirect()->route('home')->with('success', 'Family created successfully!');
     }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Family $family)
     {
-        // Vous pouvez ajouter une logique ici si vous souhaitez afficher les détails d'une famille spécifique
+        // Logic to display the family and its members
         return view('families.show', compact('family'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Family $family)
-    {
-        return view('families.edit', compact('family'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Family $family)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        $family->update([
-            'name' => $request->name,
-        ]);
-
-        return redirect()->route('families.index')->with('success', 'Famille mise à jour avec succès.');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Family $family)
-    {
-        $family->delete();
-
-        return redirect()->route('families.index')->with('success', 'Famille supprimée avec succès.');
     }
 }

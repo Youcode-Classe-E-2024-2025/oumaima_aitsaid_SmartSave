@@ -2,70 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
-class AuthController extends Controller 
+class AuthController extends Controller
 {
     public function showRegistrationForm()
     {
-        return view('register');
+        return view('auth.register');
     }
 
-public function register(Request $request){
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
 
-    $validator =Validator::make($request->all(), [
-        'name' => 'required|string|max:255',
-        'email'=>'required|string|email|max:255|unique:users',
-        'password'=>'required|string|max:50',
-    ]);
-    if($validator->fails()){
-        return redirect('register')
-        ->withErrors($validator)
-        ->withInput();
-    }
-
-  $user = User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::login($user);
+        Auth::login($user); // Log in the newly registered user
 
-        return redirect('home');
+        return redirect()->route('home');
     }
 
     public function showLoginForm()
     {
-        return view('login');
+        return view('auth.login');
     }
 
     public function login(Request $request)
     {
+        $request->validate([
+            'email' => 'required|string|email|max:255',
+            'password' => 'required|string',
+        ]);
+
         $credentials = $request->only('email', 'password');
 
         if (Auth::attempt($credentials)) {
-            return redirect()->intended('home');
+            $request->session()->regenerate(); // Prevent session fixation
+            return redirect()->intended('home'); // Redirect to intended URL or 'home'
         }
 
-        return redirect('login')->withErrors(['message' => 'Identifiants incorrects.']);
+        return back()->withErrors(['email' => 'Invalid credentials.']);
     }
 
-    public function home()
-    {
-        return view('home');
-    }
     public function logout(Request $request)
     {
         Auth::logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/'); 
-}}
+        return redirect('/');
+    }
+}
