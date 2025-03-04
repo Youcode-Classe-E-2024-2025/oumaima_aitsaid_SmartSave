@@ -6,6 +6,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\FinancialGoalController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CategoryController;
 use App\Models\Expense; 
 use App\Models\Income;
@@ -54,3 +55,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('financial_goals', FinancialGoalController::class);
 });
 Route::resource('categories',CategoryController::class);
+Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
